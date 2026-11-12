@@ -1,10 +1,12 @@
 extends CharacterBody3D
 
 # Variables de movimiento
-@export var speed = 14
+@export var speed = 14.0
+var base_speed = 14.0
 @export var fall_acceleration = 10
 @export var jump_force = 500
 var target_velocity = Vector3.ZERO
+var isCrouch = false
 
 # Variables para el mouse
 const MOUSE_SENSITIVITY := 0.002
@@ -52,7 +54,7 @@ func _physics_process(delta): # Función para las físicas
 	camera_forward = camera_forward.normalized()
 	camera_right = camera_right.normalized()
 	
-	# Detectamos los inputs
+	# Detectamos los inputs direccionales
 	if Input.is_action_pressed("move_right"):
 		direction += camera_right
 	if Input.is_action_pressed("move_left"):
@@ -82,6 +84,26 @@ func _physics_process(delta): # Función para las físicas
 	if is_on_floor() and Input.is_action_pressed("jump"):
 		target_velocity.y = target_velocity.y + (jump_force * delta)
 
+	# Lógica para agacharse
+	if Input.is_action_pressed("crouch") and not isCrouch:
+		isCrouch = true
+		speed = speed / 2
+		$CollisionShape3D.shape.height = 0.5
+		
+	if Input.is_action_just_released("crouch") and isCrouch:
+		if can_stand():
+			isCrouch = false
+			speed = base_speed
+			$CollisionShape3D.shape.height = 2
+	
+	if can_stand() and isCrouch and not Input.is_action_pressed("crouch"):
+		isCrouch = false
+		speed = base_speed
+		$CollisionShape3D.shape.height = 2
+		
 	# Moving the Character
 	velocity = target_velocity
 	move_and_slide()
+	
+func can_stand() -> bool: # Función auxiliar para levantarse
+	return $StandCheck.get_overlapping_bodies().is_empty()

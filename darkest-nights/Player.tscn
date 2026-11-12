@@ -6,6 +6,8 @@
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_g4v7s"]
 
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_xhfnw"]
+
 [node name="Player" type="Node3D" unique_id=441289176]
 
 [node name="CharacterBody3D" type="CharacterBody3D" parent="." unique_id=1944175265]
@@ -21,8 +23,15 @@ debug_color = Color(0, 0.57108206, 0.8436342, 0.41960785)
 mesh = SubResource("CapsuleMesh_g4v7s")
 
 [node name="Camera3D" type="Camera3D" parent="CharacterBody3D" unique_id=491630876]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -0.10467237)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 current = true
 
 [node name="Marker3D" type="Marker3D" parent="CharacterBody3D/Camera3D" unique_id=1455002347]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0.10467237)
+
+[node name="StandCheck" type="Area3D" parent="CharacterBody3D" unique_id=989153122]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 1.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBody3D/StandCheck" unique_id=1595237995]
+shape = SubResource("CapsuleShape3D_xhfnw")
+debug_color = Color(0.7737932, 0, 0.013058065, 0.41960785)
