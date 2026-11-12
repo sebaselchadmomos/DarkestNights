@@ -1,5 +1,13 @@
 [gd_scene format=3 uid="uid://b32sed4emg2i4"]
 
+[ext_resource type="PackedScene" uid="uid://bvcv4t3lshaf8" path="res://Player.tscn" id="1_begwh"]
+
+[sub_resource type="Environment" id="Environment_g4v7s"]
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_k3far"]
+
+[sub_resource type="Compositor" id="Compositor_m4m0t"]
+
 [node name="Node3D" type="Node3D" unique_id=759326149]
 
 [node name="CSGBox3D" type="CSGBox3D" parent="." unique_id=803784663]
@@ -37,3 +45,12 @@ size = Vector3(4, 1, 13)
 [node name="CSGBox3D8" type="CSGBox3D" parent="." unique_id=1541739892]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.521814, 1.9429166, 6.197365)
 size = Vector3(4, 1, 13)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=866021074]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=116675479]
+environment = SubResource("Environment_g4v7s")
+camera_attributes = SubResource("CameraAttributesPractical_k3far")
+compositor = SubResource("Compositor_m4m0t")
+
+[node name="Player" parent="." unique_id=441289176 instance=ExtResource("1_begwh")]

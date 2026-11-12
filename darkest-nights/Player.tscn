@@ -1,0 +1,27 @@
+[gd_scene format=3 uid="uid://bvcv4t3lshaf8"]
+
+[ext_resource type="Script" uid="uid://cpq2yke5ie4jj" path="res://Scripts/player.gd" id="1_xhfnw"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_g4v7s"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_g4v7s"]
+
+[node name="Player" type="Node3D" unique_id=441289176]
+
+[node name="CharacterBody3D" type="CharacterBody3D" parent="." unique_id=1944175265]
+script = ExtResource("1_xhfnw")
+
+[node name="Pivot" type="Node3D" parent="CharacterBody3D" unique_id=911055637]
+
+[node name="Marker3D" type="Marker3D" parent="CharacterBody3D" unique_id=1455002347]
+
+[node name="Camera3D" type="Camera3D" parent="CharacterBody3D/Marker3D" unique_id=491630876]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -0.10467237)
+current = true
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBody3D" unique_id=1625188646]
+shape = SubResource("CapsuleShape3D_g4v7s")
+debug_color = Color(0, 0.57108206, 0.8436342, 0.41960785)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CharacterBody3D/CollisionShape3D" unique_id=35779933]
+mesh = SubResource("CapsuleMesh_g4v7s")
