@@ -8,30 +8,36 @@
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_xhfnw"]
 
-[node name="Player" type="Node3D" unique_id=441289176]
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_xhfnw"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
 
-[node name="CharacterBody3D" type="CharacterBody3D" parent="." unique_id=1944175265]
+[node name="CharacterBody3D" type="CharacterBody3D" unique_id=1511801776]
 script = ExtResource("1_xhfnw")
 
-[node name="Pivot" type="Node3D" parent="CharacterBody3D" unique_id=911055637]
+[node name="Pivot" type="Node3D" parent="." unique_id=283428825]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBody3D" unique_id=1625188646]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1971844001]
 shape = SubResource("CapsuleShape3D_g4v7s")
 debug_color = Color(0, 0.57108206, 0.8436342, 0.41960785)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="CharacterBody3D/CollisionShape3D" unique_id=35779933]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CollisionShape3D" unique_id=2005060056]
 mesh = SubResource("CapsuleMesh_g4v7s")
 
-[node name="Camera3D" type="Camera3D" parent="CharacterBody3D" unique_id=491630876]
+[node name="Camera3D" type="Camera3D" parent="." unique_id=412954619]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 current = true
 
-[node name="Marker3D" type="Marker3D" parent="CharacterBody3D/Camera3D" unique_id=1455002347]
+[node name="Marker3D" type="Marker3D" parent="Camera3D" unique_id=1835379362]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0.10467237)
 
-[node name="StandCheck" type="Area3D" parent="CharacterBody3D" unique_id=989153122]
+[node name="StandCheck" type="Area3D" parent="." unique_id=477531442]
 transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 1.5, 0)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBody3D/StandCheck" unique_id=1595237995]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StandCheck" unique_id=1662127650]
 shape = SubResource("CapsuleShape3D_xhfnw")
 debug_color = Color(0.7737932, 0, 0.013058065, 0.41960785)
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=1346270290]
+replication_config = SubResource("SceneReplicationConfig_xhfnw")

@@ -14,10 +14,14 @@ var camera_forward: Vector3
 var camera_right: Vector3
 
 func _ready():
-	# Lockea el cursor
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-
+	if is_multiplayer_authority():
+		$Camera3D.current = true
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	else:
+		$Camera3D.current = false
+		
 func _process(_delta: float) -> void:
+	if !is_multiplayer_authority(): return
 	# Deslockea el cursor con ESC
 	if Input.is_action_pressed("ui_cancel"):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -26,7 +30,12 @@ func _process(_delta: float) -> void:
 	if Input.is_action_pressed("ui_focus_next"):
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
+func _enter_tree() -> void:
+	set_multiplayer_authority(name.to_int())
+
 func _unhandled_input(event): # Función para rotar la cámara
+	if !is_multiplayer_authority(): return
+	
 	if event is InputEventMouseMotion:
 		
 		# Rotación
@@ -42,6 +51,8 @@ func _unhandled_input(event): # Función para rotar la cámara
 		
 		
 func _physics_process(delta): # Función para las físicas
+	if !is_multiplayer_authority(): return
+	
 	var direction = Vector3.ZERO
 	
 	# Conseguimos valores de la cámara

@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://b32sed4emg2i4"]
 
 [ext_resource type="PackedScene" uid="uid://bvcv4t3lshaf8" path="res://Player.tscn" id="1_begwh"]
+[ext_resource type="Script" uid="uid://bclkrsskank3r" path="res://Scripts/Multiplayer/multiplayer_spawner.gd" id="2_0xh53"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_g4v7s"]
 
@@ -19,6 +20,9 @@ reflected_light_source = 2
 [sub_resource type="Compositor" id="Compositor_m4m0t"]
 
 [node name="Node3D" type="Node3D" unique_id=759326149]
+
+[node name="SpawnPoint" type="Node3D" parent="." unique_id=954319680]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
 
 [node name="CSGBox3D" type="CSGBox3D" parent="." unique_id=803784663]
 use_collision = true
@@ -72,5 +76,8 @@ environment = SubResource("Environment_g4v7s")
 camera_attributes = SubResource("CameraAttributesPractical_k3far")
 compositor = SubResource("Compositor_m4m0t")
 
-[node name="Player" parent="." unique_id=441289176 instance=ExtResource("1_begwh")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="." unique_id=861580001]
+_spawnable_scenes = PackedStringArray("uid://bvcv4t3lshaf8")
+spawn_path = NodePath("../SpawnPoint")
+script = ExtResource("2_0xh53")
+network_player = ExtResource("1_begwh")
