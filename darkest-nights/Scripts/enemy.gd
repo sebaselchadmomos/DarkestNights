@@ -141,6 +141,8 @@ func _state_patrol(delta: float) -> void:
 		return
 	if not _has_patrol_point:
 		_pick_patrol_point()
+		if not _has_patrol_point:
+			return
 	if _nav.is_navigation_finished():
 		_has_patrol_point = false
 		_patrol_wait = data.patrol_wait_time
@@ -257,9 +259,12 @@ func _lose_target() -> void:
 
 
 func _pick_patrol_point() -> void:
+	var map := _nav.get_navigation_map()
+	if NavigationServer3D.map_get_iteration_id(map) == 0:
+		return  # el mapa aún no se sincronizó; reintenta el próximo frame
 	var dir := Vector3(randf_range(-1.0, 1.0), 0.0, randf_range(-1.0, 1.0)).normalized()
 	var point := _home + dir * randf_range(2.0, data.patrol_radius)
-	_nav.target_position = NavigationServer3D.map_get_closest_point(_nav.get_navigation_map(), point)
+	_nav.target_position = NavigationServer3D.map_get_closest_point(map, point)
 	_has_patrol_point = true
 
 
