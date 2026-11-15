@@ -1,0 +1,25 @@
+[gd_scene format=3 uid="uid://dqnad51lcvm7e"]
+
+[ext_resource type="Script" uid="uid://r8egatfaqrci" path="res://Scripts/Enemies/chaser.gd" id="1_wovta"]
+[ext_resource type="Resource" uid="uid://cg28o7gliblxy" path="res://chaser_data.tres" id="2_xeo28"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_bhunq"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_bhunq"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_riqys"]
+albedo_color = Color(0.9614487, 0.45860618, 0, 1)
+
+[node name="Node3D" type="CharacterBody3D" unique_id=2092126161]
+script = ExtResource("1_wovta")
+data = ExtResource("2_xeo28")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=712887171]
+shape = SubResource("CapsuleShape3D_bhunq")
+debug_color = Color(0.9895342, 0.100879125, 0, 0.41960785)
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="." unique_id=665634843]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=278397952]
+mesh = SubResource("CapsuleMesh_bhunq")
+surface_material_override/0 = SubResource("StandardMaterial3D_riqys")
