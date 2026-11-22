@@ -23,6 +23,7 @@ enum Size { SMALL, MEDIUM, LARGE }
 @export var requires_line_of_sight := true
 
 @export_group("Combate")
+@export var attack_damage := 5.0  # vida que le quita al jugador por golpe
 @export var attack_range := 1.6
 @export var attack_windup := 0.4  # tiempo de aviso antes del golpe (counterplay)
 @export var attack_cooldown := 1.5

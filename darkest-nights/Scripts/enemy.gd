@@ -9,7 +9,7 @@ extends CharacterBody3D
 ## Contrato con el jugador (duck typing):
 ##   - estar en el grupo "players"
 ##   - is_targetable() -> bool   (false si está derribado/muerto)
-##   - take_hit(source: Node3D)  (opcional; lo llama el ataque por defecto)
+##   - receive_damage(amount)    (RPC; el ataque por defecto se lo manda al peer dueño del jugador)
 ##
 ## Para crear un enemigo nuevo: extender esta clase y sobreescribir los hooks "_..." de abajo.
 
@@ -21,12 +21,15 @@ const STATE_PATROL := &"patrol"
 const STATE_CHASE := &"chase"
 const STATE_ATTACK := &"attack"
 const STATE_STUNNED := &"stunned"
+const PATROL_TIMEOUT := 15.0  # si no llega a un punto de patrulla en este tiempo, elige otro
 
 @export var data: EnemyData
 @export var ai_enabled := true  # apagar para probar sin que estorbe
 @export var gravity := 20.0
 @export var eye_height := 0.5
 @export var turn_speed := 10.0
+@export var fallback_feet_offset := 1.0  # distancia origen-pies si la colisión no es cápsula/cilindro/caja
+@export var debug_log := false  # imprime posición y camino cada 0,5 s
 
 # Se replica a los clientes. El setter corre en todos los peers (útil para animaciones/audio).
 var state: StringName = STATE_PATROL:
@@ -37,6 +40,8 @@ var _nav: NavigationAgent3D
 var _home := Vector3.ZERO
 var _has_patrol_point := false
 var _patrol_wait := 0.0
+var _patrol_timeout := 0.0
+var _nav_calibrated := false
 var _repath_timer := 0.0
 var _time_since_seen := 0.0
 var _state_timer := 0.0  # usado por ATTACK (windup) y STUNNED
@@ -49,7 +54,13 @@ func _enter_tree() -> void:
 
 func _ready() -> void:
 	assert(data != null, "Enemy sin EnemyData asignado")
+	add_to_group("enemies")
 	_nav = $NavigationAgent3D
+	# El origen del enemigo está a media altura (cápsula centrada) pero la malla de navegación
+	# está en el piso. Sin este offset el agente nunca "llega" a los puntos del camino y se frena.
+	_nav.path_height_offset = -_feet_offset()
+	_nav.path_desired_distance = 0.6
+	_nav.target_desired_distance = 0.9
 	if not multiplayer.is_server():
 		return
 	_home = global_position
@@ -60,6 +71,8 @@ func _physics_process(delta: float) -> void:
 	if not multiplayer.is_server() or not ai_enabled:
 		return
 
+	if not _nav_calibrated:
+		_calibrate_nav_height()
 	_attack_cooldown = maxf(_attack_cooldown - delta, 0.0)
 	velocity.x = 0.0
 	velocity.z = 0.0
@@ -116,8 +129,9 @@ func _is_target_allowed(_player: Node3D) -> bool:
 
 ## Qué pasa cuando el ataque conecta.
 func _on_attack_hit(victim: Node3D) -> void:
-	if victim.has_method("take_hit"):
-		victim.take_hit(self)
+	# La vida la maneja el peer dueño del jugador (puede ser el propio servidor).
+	if victim.has_method("receive_damage"):
+		victim.rpc_id(victim.get_multiplayer_authority(), "receive_damage", data.attack_damage)
 
 
 ## Estados propios de un enemigo derivado (ej: &"flee" del Jumper).
@@ -142,8 +156,11 @@ func _state_patrol(delta: float) -> void:
 	if not _has_patrol_point:
 		_pick_patrol_point()
 		if not _has_patrol_point:
-			return
-	if _nav.is_navigation_finished():
+			return  # el mapa de navegación aún no está listo
+	_patrol_timeout -= delta
+	if _reached_horizontally(_nav.target_position, 1.0) \
+			or _nav.is_navigation_finished() \
+			or _patrol_timeout <= 0.0:
 		_has_patrol_point = false
 		_patrol_wait = data.patrol_wait_time
 		return
@@ -265,11 +282,50 @@ func _pick_patrol_point() -> void:
 	var dir := Vector3(randf_range(-1.0, 1.0), 0.0, randf_range(-1.0, 1.0)).normalized()
 	var point := _home + dir * randf_range(2.0, data.patrol_radius)
 	_nav.target_position = NavigationServer3D.map_get_closest_point(map, point)
+	_patrol_timeout = PATROL_TIMEOUT
 	_has_patrol_point = true
 
 
+## La malla de navegación puede quedar a otra altura que los pies del enemigo.
+## Se mide la diferencia real (origen del enemigo vs punto más cercano de la malla)
+## en vez de suponerla, y se usa como path_height_offset.
+func _calibrate_nav_height() -> void:
+	var map := _nav.get_navigation_map()
+	if NavigationServer3D.map_get_iteration_id(map) == 0 or not is_on_floor():
+		return
+	var surface := NavigationServer3D.map_get_closest_point(map, global_position)
+	var off := global_position - surface
+	if Vector2(off.x, off.z).length() > 1.5:
+		return  # el enemigo está lejos de la malla: no es una medición confiable
+	_nav.path_height_offset = -off.y
+	_nav_calibrated = true
+
+
+func _reached_horizontally(point: Vector3, distance: float) -> bool:
+	var d := point - global_position
+	d.y = 0.0
+	return d.length() < distance
+
+
+## Distancia del origen del enemigo a sus pies (el origen de una cápsula centrada está a media altura).
+func _feet_offset() -> float:
+	var col := get_node_or_null("CollisionShape3D") as CollisionShape3D
+	if col != null:
+		if col.shape is CapsuleShape3D:
+			return (col.shape as CapsuleShape3D).height * 0.5 - col.position.y
+		if col.shape is CylinderShape3D:
+			return (col.shape as CylinderShape3D).height * 0.5 - col.position.y
+		if col.shape is BoxShape3D:
+			return (col.shape as BoxShape3D).size.y * 0.5 - col.position.y
+	return fallback_feet_offset
+
+
 func _move_along_path(speed: float, delta: float) -> void:
-	var dir := _nav.get_next_path_position() - global_position
+	var next_pos := _nav.get_next_path_position()
+	if debug_log and Engine.get_physics_frames() % 30 == 0:
+		print("[%s] estado=%s pos=%s siguiente=%s destino=%s terminado=%s" % [
+			name, state, global_position, next_pos, _nav.target_position, _nav.is_navigation_finished()])
+	var dir := next_pos - global_position
 	dir.y = 0.0
 	if dir.length() < 0.05:
 		return
