@@ -53,6 +53,9 @@ const MOUSE_SENSITIVITY := 0.002
 @export var landing_dip_scale := 0.01    # metros de "golpe" por cada m/s de caída
 @export var landing_dip_max := 0.12
 
+@export_group("Mapa")
+@export var fall_limit_y := -20.0        # si cae por debajo de esta altura, vuelve al mapa
+
 # Estado público (HUD, animaciones, enemigos, etc.)
 var stamina := 0.0
 var is_sprinting := false
@@ -122,6 +125,9 @@ func _ready() -> void:
 		_camera.current = true
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 		_create_hud()
+		var fall_recovery := FallRecovery.new()
+		fall_recovery.fall_limit_y = fall_limit_y
+		add_child(fall_recovery)
 	else:
 		_camera.current = false
 

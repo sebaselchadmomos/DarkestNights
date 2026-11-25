@@ -28,6 +28,7 @@ const PATROL_TIMEOUT := 15.0  # si no llega a un punto de patrulla en este tiemp
 @export var gravity := 20.0
 @export var eye_height := 0.5
 @export var turn_speed := 10.0
+@export var fall_limit_y := -20.0  # si cae por debajo de esta altura, vuelve al mapa
 @export var fallback_feet_offset := 1.0  # distancia origen-pies si la colisión no es cápsula/cilindro/caja
 @export var debug_log := false  # imprime posición y camino cada 0,5 s
 
@@ -64,6 +65,10 @@ func _ready() -> void:
 	if not multiplayer.is_server():
 		return
 	_home = global_position
+	var fall_recovery := FallRecovery.new()
+	fall_recovery.fall_limit_y = fall_limit_y
+	fall_recovery.recovered.connect(func(_pos: Vector3) -> void: _has_patrol_point = false)
+	add_child(fall_recovery)
 	_on_spawned()
 
 
