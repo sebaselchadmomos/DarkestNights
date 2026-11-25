@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://dqnad51lcvm7e"]
 
 [ext_resource type="Script" uid="uid://r8egatfaqrci" path="res://Scripts/Enemies/chaser.gd" id="1_wovta"]
-[ext_resource type="Resource" uid="uid://cg28o7gliblxy" path="res://chaser_data.tres" id="2_xeo28"]
+[ext_resource type="Resource" uid="uid://cg28o7gliblxy" path="res://Scripts/Enemies/chaser_data.tres" id="2_xeo28"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_bhunq"]
 

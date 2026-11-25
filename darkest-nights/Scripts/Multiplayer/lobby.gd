@@ -7,7 +7,7 @@ const GAME_SCENE_PATH: String = "res://Scenes/Gym.tscn"
 # true:  el host espera en el menú (viendo el código) hasta que entre el otro jugador.
 # false: el host entra al juego apenas se crea la sala; el código queda en
 #        NetworkHandler.lobby_code por si querés mostrarlo en el juego.
-const HOST_WAITS_FOR_PLAYER: bool = true
+const HOST_WAITS_FOR_PLAYER: bool = false
 
 var code_input: LineEdit
 var host_button: Button
